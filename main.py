@@ -1,7 +1,9 @@
-portfolio = {
-  'AAPL': {'unrealized': 8.72, 'cumulative': 15.25},
-  'QQQ':  {'unrealized': 9.94, 'cumulative': 10.25},
-  'ITOT': {'unrealized': 3.03, 'cumulative': 3.35},
+import yfinance as yf
+
+holdings = {
+  'AAPL': {'shares': 0.648, 'cost': 166.19},
+  'QQQ':  {'shares': 0.279, 'cost': 174.91},
+  'ITOT': {'shares': 0.598, 'cost': 90.23},
 }
 
 etfs = {
@@ -21,11 +23,21 @@ print('   WEBULL CONNECTOR - FELDON PORTFOLIO TOOL')
 print('=' * 55)
 
 print()
-print('--- CURRENT HOLDINGS ---')
-total_gain = sum(s['unrealized'] for s in portfolio.values())
-for stock, data in portfolio.items():
-    print(stock, '| Unrealized: $' + str(data['unrealized']), '| Total Gain: $' + str(data['cumulative']))
-print('Total Unrealized Gain: $' + str(round(total_gain, 2)))
+print('--- LIVE PORTFOLIO ---')
+total_value = 0
+total_cost = 0
+for ticker, data in holdings.items():
+    stock = yf.Ticker(ticker)
+    info = stock.info
+    price = info.get('currentPrice') or info.get('regularMarketPrice') or info.get('navPrice')
+    value = round(price * data['shares'], 2)
+    gain = round(value - data['cost'], 2)
+    total_value += value
+    total_cost += data['cost']
+    print(ticker, '| Price: $' + str(price), '| Value: $' + str(value), '| Gain: $' + str(gain))
+
+print('Total Value: $' + str(round(total_value, 2)))
+print('Total Gain: $' + str(round(total_value - total_cost, 2)))
 
 print()
 print('--- ETF COMPARISON - $328 over 5 years ---')
